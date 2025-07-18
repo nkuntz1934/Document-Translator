@@ -8,33 +8,93 @@ This application leverages Cloudflare's edge computing platform to deliver fast,
 
 ## Architecture
 
+### Document Lifecycle Flow
+
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│                 │    │                 │    │                 │
-│   Web Client    │◄───┤ Cloudflare Edge │◄───┤ Cloudflare AI   │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │                 │
-                       │ Cloudflare      │
-                       │ Workers         │
-                       │ Runtime         │
-                       │                 │
-                       └─────────────────┘
-                                │
-                ┌───────────────┼───────────────┐
-                ▼               ▼               ▼
-        ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-        │             │ │             │ │             │
-        │ Cloudflare  │ │ Cloudflare  │ │ Meta AI     │
-        │ R2 Storage  │ │ KV Store    │ │ Translation │
-        │             │ │             │ │ Model       │
-        │ Documents   │ │ Metadata    │ │ M2M100-1.2B │
-        │             │ │ Cache       │ │             │
-        └─────────────┘ └─────────────┘ └─────────────┘
+1. UPLOAD
+┌─────────────────┐
+│   User Device   │
+│                 │
+│ [document.pdf]  │
+└─────────────────┘
+         │
+         ▼ HTTP POST /upload
+┌─────────────────┐
+│ Cloudflare Edge │
+│                 │
+│ • File validate │
+│ • Size check    │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Workers Runtime │
+│                 │
+│ • Generate ID   │
+│ • Extract text  │
+│ • Preserve fmt  │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ R2 Storage      │
+│                 │
+│ • Store file    │
+│ • Store text    │
+│ • Store metadata│
+└─────────────────┘
+
+2. TRANSLATION
+┌─────────────────┐
+│ Workers Runtime │
+│                 │
+│ • Chunk text    │
+│ • Prepare batch │
+└─────────────────┘
+         │
+         ▼ Translation request
+┌─────────────────┐
+│ Cloudflare AI   │
+│                 │
+│ • Meta M2M100   │
+│ • Process batch │
+│ • Return trans  │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ KV Store        │
+│                 │
+│ • Cache results │
+│ • Store metadata│
+└─────────────────┘
+
+3. DOWNLOAD
+┌─────────────────┐
+│ Workers Runtime │
+│                 │
+│ • Retrieve text │
+│ • Format output │
+└─────────────────┘
+         │
+         ▼ HTTP GET /download
+┌─────────────────┐
+│   User Device   │
+│                 │
+│ [translated.txt]│
+└─────────────────┘
 ```
+
+### System Components
+
+| Component | Purpose | Technology |
+|-----------|---------|------------|
+| **Web Client** | User interface | HTML5 + JavaScript |
+| **Cloudflare Edge** | Global CDN & routing | Cloudflare Network |
+| **Workers Runtime** | Serverless compute | V8 JavaScript Engine |
+| **R2 Storage** | Document storage | Object storage |
+| **KV Store** | Metadata cache | Key-value database |
+| **Cloudflare AI** | Translation engine | Meta M2M100-1.2B |
 
 ## Features
 
