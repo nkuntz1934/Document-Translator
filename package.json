@@ -1,0 +1,23 @@
+{
+  "name": "document-translator",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers document translation service with R2 storage and AutoRAG",
+  "main": "src/index.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "mammoth": "^1.8.0",
+    "pdf-parse": "^1.1.1",
+    "html-to-text": "^9.0.5",
+    "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.6.4",
+    "vitest": "~2.1.9",
+    "wrangler": "^4.0.0"
+  }
+}

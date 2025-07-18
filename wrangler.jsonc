@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "document-translator",
+  "main": "src/index.js",
+  "compatibility_date": "2025-03-03",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  
+  "r2_buckets": [
+    {
+      "binding": "DOCUMENTS",
+      "bucket_name": "document-translator-storage"
+    }
+  ],
+  
+  "ai": {
+    "binding": "AI"
+  },
+  
+  "kv_namespaces": [
+    {
+      "binding": "TRANSLATION_CACHE",
+      "id": "09789e82c6e7418a9762c769d2feaefd"
+    }
+  ],
+  
+  "vars": {
+    "AUTORAG_API_URL": "https://api.autorag.com/v1",
+    "MAX_FILE_SIZE": "50000000"
+  }
+}
